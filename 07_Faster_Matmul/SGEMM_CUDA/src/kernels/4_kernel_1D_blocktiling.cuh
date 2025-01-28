@@ -58,16 +58,33 @@ __global__ void sgemm1DBlocktiling(int M, int N, int K, float alpha,
     A += BK;
     B += BK * N;
 
+    // START: relevant params in kernel call
+    // const uint BM = 64;
+    // const uint BN = 64;
+    // const uint BK = 8;
+    // const uint TM = 8; --> Tile Dimension: number of output entries handled in one thread
+    // dim3 gridDim(CEIL_DIV(N, BN), CEIL_DIV(M, BM));
+    // dim3 blockDim((BM * BN) / TM);
+    // sgemm1DBlocktiling<BM, BN, BK, TM>
+    // END: relevant params in kernel call
+
     // calculate per-thread results
     for (uint dotIdx = 0; dotIdx < BK; ++dotIdx) {
       // we make the dotproduct loop the outside loop, which facilitates
       // reuse of the Bs entry, which we can cache in a tmp var.
       float tmpB = Bs[dotIdx * BN + threadCol];
-      for (uint resIdx = 0; resIdx < TM; ++resIdx) {
+      for (uint resIdx = 0; resIdx < TM; ++resIdx) { // column loop --> each thread calculates a column of result, instead of single etry result
         threadResults[resIdx] +=
             As[(threadRow * TM + resIdx) * BK + dotIdx] * tmpB;
       }
     }
+    // Above for loops switchs the order. The strightforward loop should be:
+    // for (uint resIdx = 0; resIdx < TM; ++resIdx) {
+    //   for (uint dotIdx = 0; dotIdx < BK; ++dotIdx) {
+    //     threadResults[resIdx] +=
+    //       As[(threadRow * TM + resIdx) * BK + dotIdx] * Bs[dotIdx * BN + threadCol]; // per threadRow consists of TM rows, as it threads in chage of one column entry with size of TM rows
+    //   }
+    // }
     __syncthreads();
   }
 
