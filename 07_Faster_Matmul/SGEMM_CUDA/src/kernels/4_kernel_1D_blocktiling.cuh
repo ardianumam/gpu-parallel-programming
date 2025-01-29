@@ -52,7 +52,7 @@ __global__ void sgemm1DBlocktiling(int M, int N, int K, float alpha,
     // populate the SMEM caches
     As[innerRowA * BK + innerColA] = A[innerRowA * K + innerColA];
     Bs[innerRowB * BN + innerColB] = B[innerRowB * N + innerColB];
-    __syncthreads();
+    __syncthreads(); // --> sync this data load for all threads within the block
 
     // advance blocktile
     A += BK;
