@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import time
+import numpy as np
 import polynomial_cuda  # This assumes you've built the extension using setup.py
 
 class CUDAPolynomialActivation(torch.autograd.Function):
@@ -33,7 +34,8 @@ def benchmark(func, x, name, num_runs=1000):
         func(x)
     torch.cuda.synchronize()
     end_time = time.time()
-    return f"{name}: {(end_time - start_time) / num_runs * 1000:.4f} ms"
+    # return f"{name}: {(end_time - start_time) / num_runs * 1000:.4f} ms"
+    return np.around(((end_time - start_time) / num_runs * 1000), decimals=6)
 
 # Main function to run benchmarks
 def main():
@@ -49,8 +51,9 @@ def main():
     pytorch_time = benchmark(pytorch_activation, x, "PyTorch built-in")
     cuda_time = benchmark(cuda_activation, x, "CUDA extension")
 
-    print(pytorch_time)
-    print(cuda_time)
-
+    print(f"PyTorch built-in execution time: {pytorch_time}")
+    print(f"CUDA extension execution time: {cuda_time}")
+    print(f"Speep-up from built-in PyTorch to CUDA extension: {np.around((pytorch_time/cuda_time), decimals=5)}")
+    
 if __name__ == "__main__":
     main()
