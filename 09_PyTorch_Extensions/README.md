@@ -1,8 +1,13 @@
 # Custom PyTorch Extensions
-
+To instal the extension, we can run:
 ```bash
 python setup.py install 
 ```
+This will directly install to the current (active) python environment and produce `egg` python package distribution file in `dist` folder. However, this package extension is considered old and deprecated. If we want to build and distribute the package, use `whl` instead. To do that, run the script below:
+```bash
+python setup.py bdist_wheel
+```
+Note that the script above only builds the `whl` file in `dist` folder, and not directly install the extension. To install it, we can run `pip install dist/the_package_name.whl`
 
 ## What is the `scalar_t` type?
 - think of this as the type of the elements in the CUDA torch tensor
