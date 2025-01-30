@@ -46,13 +46,13 @@ __global__ void __launch_bounds__((BM * BN) / (TM * TN), 1)
   const uint innerColA = threadIdx.x % BK;
   // calculates the number of rows of As that are being loaded in a single step
   // by a single block
-  const uint strideA = numThreadsBlocktile / BK;
-  const uint innerRowB = threadIdx.x / BN;
-  const uint innerColB = threadIdx.x % BN;
+  const uint strideA = numThreadsBlocktile / BK; // if TM=TN=BK=8, strideA=8*8/8=8
+  const uint innerRowB = threadIdx.x / BN; // ranges [0,0]
+  const uint innerColB = threadIdx.x % BN; // ranges [0,63]
   // for both As and Bs we want each load to span the full column-width, for
   // better GMEM coalescing (as opposed to spanning full row-width and iterating
   // across columns)
-  const uint strideB = numThreadsBlocktile / BN;
+  const uint strideB = numThreadsBlocktile / BN; // 1
 
   // allocate thread-local cache for results in registerfile
   float threadResults[TM * TN] = {0.0};
